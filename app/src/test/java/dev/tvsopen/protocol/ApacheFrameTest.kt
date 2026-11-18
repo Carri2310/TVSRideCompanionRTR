@@ -23,13 +23,13 @@ class ApacheFrameTest {
 
     @Test
     fun `0x10 decodes speed, odometer, fuel, 0-60, 2-byte trip F and RPM at 16-17`() {
-        // Example odometer: 52,966.2 km -> 529,662 tenths = 0x08 0x15 0x0E (BE)
+        // Example odometer: 52,966.2 km -> 529,662 tenths = 0x08 0x14 0xFE (BE)
         // Example RPM: 4200 = 0x10 0x68 at bytes 16..17 (Ntorq puts RPM at 17..18)
         // Example Trip F: 250 = 0x00 0xFA at bytes 14..15 (2 bytes, not 3)
         val raw = frame(
             0x5A, 0x10,
             64,                 // idx 2: speed 64 km/h
-            0x08, 0x15, 0x0E,   // idx 3..5: odometer raw 529662 -> 52966.2 km
+            0x08, 0x14, 0xFE,   // idx 3..5: odometer raw 529662 -> 52966.2 km
             0x03,               // idx 6: fuel level
             39,                 // idx 7: average speed
             42,                 // idx 8: mileage
