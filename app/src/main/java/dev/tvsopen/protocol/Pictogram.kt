@@ -128,26 +128,56 @@ object Pictograms {
  */
 object ManeuverResolver {
 
+    private val COMBINING_MARKS = Regex("\\p{Mn}+")
+
     private val rules: List<Pair<Regex, Int>> = listOf(
-        Regex("u[- ]?turn|make a u", RegexOption.IGNORE_CASE) to Pictograms.U_TURN_LEGACY.id,
-        Regex("\\broundabout\\b", RegexOption.IGNORE_CASE) to 68,
-        Regex("\\bexit\\b.*\\broundabout\\b|\\bfirst exit\\b", RegexOption.IGNORE_CASE) to 65,
-        Regex("\\bsharp left\\b", RegexOption.IGNORE_CASE) to 1,
-        Regex("\\bslight left\\b|\\bkeep left\\b", RegexOption.IGNORE_CASE) to 2,
-        Regex("\\bsharp right\\b", RegexOption.IGNORE_CASE) to 4,
-        Regex("\\bslight right\\b|\\bkeep right\\b", RegexOption.IGNORE_CASE) to 5,
-        Regex("\\bturn left\\b|\\bleft\\b", RegexOption.IGNORE_CASE) to 0,
-        Regex("\\bturn right\\b|\\bright\\b", RegexOption.IGNORE_CASE) to 3,
-        Regex("\\bearlier\\b|\\bexit\\b", RegexOption.IGNORE_CASE) to 9,
-        Regex("\\bmerge\\b", RegexOption.IGNORE_CASE) to 14,
-        Regex("\\bfork\\b", RegexOption.IGNORE_CASE) to 15,
-        Regex("\\barrive|\\bdestination\\b|\\byou have arrived\\b", RegexOption.IGNORE_CASE) to 8,
-        Regex("\\bstraight\\b|\\bcontinue\\b", RegexOption.IGNORE_CASE) to 7,
+        Regex(
+            "u[- ]?turn|make a u|vuelta en u|giro en u|cambio de sentido|\\bretorno\\b",
+            RegexOption.IGNORE_CASE,
+        ) to Pictograms.U_TURN_LEGACY.id,
+        Regex(
+            "\\bexit\\b.*\\broundabout\\b|\\bfirst exit\\b|\\bprimera salida\\b|\\b1\\.?a? salida\\b",
+            RegexOption.IGNORE_CASE,
+        ) to 65,
+        Regex("\\broundabout\\b|\\brotonda\\b|\\bglorieta\\b", RegexOption.IGNORE_CASE) to 68,
+        Regex(
+            "\\bsharp left\\b|\\bmuy a la izquierda\\b|\\bgiro cerrado a la izquierda\\b",
+            RegexOption.IGNORE_CASE,
+        ) to 1,
+        Regex(
+            "\\bslight left\\b|\\bkeep left\\b|\\bligeramente a la izquierda\\b|\\bmantente a la izquierda\\b|\\bcarril izquierdo\\b",
+            RegexOption.IGNORE_CASE,
+        ) to 2,
+        Regex(
+            "\\bsharp right\\b|\\bmuy a la derecha\\b|\\bgiro cerrado a la derecha\\b",
+            RegexOption.IGNORE_CASE,
+        ) to 4,
+        Regex(
+            "\\bslight right\\b|\\bkeep right\\b|\\bligeramente a la derecha\\b|\\bmantente a la derecha\\b|\\bcarril derecho\\b",
+            RegexOption.IGNORE_CASE,
+        ) to 5,
+        Regex("\\bturn left\\b|\\bleft\\b|\\bgira a la izquierda\\b|\\bizquierda\\b", RegexOption.IGNORE_CASE) to 0,
+        Regex("\\bturn right\\b|\\bright\\b|\\bgira a la derecha\\b|\\bderecha\\b", RegexOption.IGNORE_CASE) to 3,
+        Regex("\\bearlier\\b|\\bexit\\b|\\btoma la salida\\b|\\bsal por\\b|\\bsalida\\b", RegexOption.IGNORE_CASE) to 9,
+        Regex("\\bmerge\\b|\\bincorporate\\b", RegexOption.IGNORE_CASE) to 14,
+        Regex("\\bfork\\b|\\bbifurcacion\\b", RegexOption.IGNORE_CASE) to 15,
+        Regex(
+            "\\barrive|\\bdestination\\b|\\byou have arrived\\b|\\bhas llegado\\b|\\bllegaras\\b|\\bdestino\\b",
+            RegexOption.IGNORE_CASE,
+        ) to 8,
+        Regex(
+            "\\bstraight\\b|\\bcontinue\\b|\\bcontinua\\b|\\bsigue recto\\b|\\brecto\\b|\\bdirigete\\b",
+            RegexOption.IGNORE_CASE,
+        ) to 7,
     )
 
     /** Returns a pictogram id, or null when nothing matches. */
     fun fromText(text: String?): Int? {
-        val t = text?.takeIf { it.isNotBlank() } ?: return null
+        val raw = text?.takeIf { it.isNotBlank() } ?: return null
+        val t = COMBINING_MARKS.replace(
+            java.text.Normalizer.normalize(raw, java.text.Normalizer.Form.NFD),
+            "",
+        )
         for ((re, id) in rules) if (re.containsMatchIn(t)) return id
         return null
     }

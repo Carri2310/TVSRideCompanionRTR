@@ -294,7 +294,15 @@ object PacketBuilder {
         // Run of anything that folds to a space.
         private val SPACE_RUN = Regex(" +")
 
+        // Combining diacritical marks stripped after NFD decomposition so Latin
+        // accents (á, é, í, ó, ú, ñ, ü) become plain ASCII letters on the cluster
+        // instead of breaking words into spaces, matching `Normalizer` in
+        // `com.tvsm.connect.latam`.
+        private val COMBINING_MARKS = Regex("\\p{Mn}+")
+
         fun sanitize(text: String, maxBytes: Int = 17): ByteArray {
+        val decomposed = java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFD)
+        val asciiFolded = COMBINING_MARKS.replace(decomposed, "")
         // Collapse each emoji/symbol run to a single 'X'.
         //
         // Upstream writes this in two steps — emoji runs become '@', and then
@@ -305,7 +313,7 @@ object PacketBuilder {
         // gap between two words. (A run of upstream's intermediate '@' through
         // our filter would fold to a space instead, which is how a prior
         // revision of this line produced "Hi there" from "Hi 🙂 there".)
-        val symbolised = EMOJI_OR_SYMBOL.replace(text, "X")
+        val symbolised = EMOJI_OR_SYMBOL.replace(asciiFolded, "X")
 
         val filtered = buildString(symbolised.length) {
             var lastWasSpace = false

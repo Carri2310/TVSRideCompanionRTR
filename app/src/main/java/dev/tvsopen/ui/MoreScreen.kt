@@ -84,7 +84,7 @@ fun MoreScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Text("KEEP THE CONNECTION ALIVE", style = MaterialTheme.typography.labelMedium,
+            Text("MANTENER LA CONEXIÓN ACTIVA", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -92,7 +92,7 @@ fun MoreScreen(
         item { DozeCard() }
 
         item {
-            Text("APPEARANCE", style = MaterialTheme.typography.labelMedium,
+            Text("APARIENCIA", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -102,7 +102,7 @@ fun MoreScreen(
         item { RiderNameCard(name = riderName, onNameChange = onRiderNameChange) }
 
         item {
-            Text("RIDES", style = MaterialTheme.typography.labelMedium,
+            Text("VIAJES", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -116,7 +116,7 @@ fun MoreScreen(
         }
 
         item {
-            Text("YOUR DATA", style = MaterialTheme.typography.labelMedium,
+            Text("TUS DATOS", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -126,8 +126,8 @@ fun MoreScreen(
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "Export rides, settings and the last parked spot as JSON. " +
-                            "Everything stays on your device unless you share it.",
+                        "Exporta viajes, ajustes y el último parqueo en formato JSON. " +
+                            "Todo permanece en tu dispositivo salvo que lo compartas.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -135,19 +135,19 @@ fun MoreScreen(
                         val json = DataExport.buildJson(ctx)
                         val intent = Intent(Intent.ACTION_SEND).apply {
                             type = "application/json"
-                            putExtra(Intent.EXTRA_SUBJECT, "TVSRide export")
+                            putExtra(Intent.EXTRA_SUBJECT, "Exportación TVSRide")
                             putExtra(Intent.EXTRA_TEXT, json)
                         }
-                        ctx.startActivity(Intent.createChooser(intent, "Export data"))
+                        ctx.startActivity(Intent.createChooser(intent, "Exportar datos"))
                     }) {
-                        Text("Export & share")
+                        Text("Exportar y compartir")
                     }
                 }
             }
         }
 
         item {
-            Text("CONNECTION", style = MaterialTheme.typography.labelMedium,
+            Text("CONEXIÓN", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -157,17 +157,17 @@ fun MoreScreen(
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(connection.model.displayName, style = MaterialTheme.typography.titleMedium)
                     // .label, not the enum name: this printed "CONNECTING".
-                    Text("State: ${connection.state.label}")
+                    Text("Estado: ${connection.state.label}")
                     connection.address?.let { Text("MAC: $it") }
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = onScan, modifier = Modifier.weight(1f)) {
                             Icon(Icons.Filled.Bluetooth, null, Modifier.size(18.dp))
                             Spacer(Modifier.size(6.dp))
-                            Text("Scan")
+                            Text("Escanear")
                         }
                         OutlinedButton(onClick = onDisconnect, modifier = Modifier.weight(1f)) {
-                            Text("Disconnect")
+                            Text("Desconectar")
                         }
                     }
                 }
@@ -175,7 +175,7 @@ fun MoreScreen(
         }
 
         item {
-            Text("PERMISSIONS", style = MaterialTheme.typography.labelMedium,
+            Text("PERMISOS", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -185,9 +185,9 @@ fun MoreScreen(
                 Column(Modifier.padding(16.dp)) {
                     Text(
                         if (notificationAccessGranted)
-                            "Notification access: granted"
+                            "Acceso a notificaciones: concedido"
                         else
-                            "Notification access: required to read navigation, calls and messages",
+                            "Acceso a notificaciones: necesario para leer navegación, llamadas y mensajes",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     if (!notificationAccessGranted) {
@@ -195,7 +195,7 @@ fun MoreScreen(
                         OutlinedButton(onClick = onOpenNotificationAccess) {
                             Icon(Icons.Filled.NotificationsActive, null, Modifier.size(18.dp))
                             Spacer(Modifier.size(6.dp))
-                            Text("Open notification access")
+                            Text("Abrir acceso a notificaciones")
                         }
                     }
                 }
@@ -203,7 +203,7 @@ fun MoreScreen(
         }
 
         item {
-            Text("ALERTS", style = MaterialTheme.typography.labelMedium,
+            Text("ALERTAS", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -221,9 +221,9 @@ fun MoreScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text("Phone & app calls", style = MaterialTheme.typography.bodyLarge)
+                            Text("Llamadas de teléfono y apps", style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                "Show incoming calls (phone, WhatsApp, Telegram, etc.) on the cluster.",
+                                "Muestra llamadas entrantes (teléfono, WhatsApp, Telegram, etc.) en el tablero.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -243,9 +243,9 @@ fun MoreScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text("Messages", style = MaterialTheme.typography.bodyLarge)
+                            Text("Mensajes", style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                "Show sender and app (WhatsApp, Telegram, SMS, etc.). Message text is never sent.",
+                                "Muestra remitente y app (WhatsApp, Telegram, SMS, etc.). Nunca envía el contenido del mensaje.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -263,7 +263,7 @@ fun MoreScreen(
         }
 
         item {
-            Text("PROTOCOL TRANSPARENCY", style = MaterialTheme.typography.labelMedium,
+            Text("TRANSPARENCIA DEL PROTOCOLO", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -277,7 +277,7 @@ fun MoreScreen(
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "What is verified, and what still needs your scooter",
+                        "Qué está verificado y qué aún requiere prueba en moto",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -314,8 +314,8 @@ fun MoreScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "● verified from the official APK   " +
-                            "◐ inherited, unverified   ○ needs capture",
+                        "● verificado en APK oficial   " +
+                            "◐ heredado, sin verificar   ○ requiere captura",
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
@@ -325,11 +325,11 @@ fun MoreScreen(
         item {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("Pictograms (${Pictograms.ids.size})",
+                    Text("Pictogramas (${Pictograms.ids.size})",
                         style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "Official app table. Two tables disagree upstream — " +
-                            "see docs/NAVIGATION.md if an arrow renders wrong.",
+                        "Tabla oficial de flechas. Si alguna flecha se muestra distinta " +
+                            "en tu tablero, revisa docs/NAVIGATION.md.",
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -339,31 +339,25 @@ fun MoreScreen(
         item {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Navigation display", style = MaterialTheme.typography.titleSmall)
+                    Text("Pantalla de navegación", style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "Every instruction is compressed before it is sent: " +
-                            "Turn left onto Example Road becomes <- LFT to Example Rd.",
+                        "Cada instrucción se acorta y normaliza a ASCII antes de enviarse: " +
+                            "Gira a la derecha hacia Av. Ejemplo → -> DER hacia Av Ejemplo.",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        "The arrow prefix marks the turn at a glance " +
-                            "(<- left, -> right, ^ straight, U U-turn, O roundabout).",
+                        "El prefijo de flecha indica el giro al instante " +
+                            "(<- izquierda, -> derecha, ^ recto, U retorno, O rotonda).",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        "Text wider than the row scrolls one window per send " +
-                            "instead of clipping its tail.",
+                        "Si el texto supera el ancho de la línea, se desplaza automáticamente " +
+                            "en cada actualización para no cortar el final.",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        "Both cluster lines go out together (0x4F + 0x50, rows = 2); " +
-                            "a single alternating line when the second has nothing to show.",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Text(
-                        "Compression, arrows and scrolling run on the phone and are " +
-                            "unit-tested. Whether the Ntorq renders both lines at once " +
-                            "still needs your scooter.",
+                        "Compatible con navegación en español e inglés desde Google Maps, " +
+                            "Waze u Organic Maps, sin cuentas ni servidores de TVS.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -377,7 +371,7 @@ fun MoreScreen(
                     Icon(Icons.Filled.Science, null)
                     Text("TVSRide", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "No account. No TVS server. No INTERNET permission.",
+                        "Sin cuenta. Sin servidores de TVS. Solo conexión directa por Bluetooth.",
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                     )
@@ -394,17 +388,17 @@ private fun RiderNameCard(name: String?, onNameChange: (String?) -> Unit) {
     var editing by remember(name) { mutableStateOf(name.orEmpty()) }
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Console greeting", style = MaterialTheme.typography.titleMedium)
+            Text("Saludo del tablero", style = MaterialTheme.typography.titleMedium)
             Text(
-                "Shown by the cluster on ignition. Saving sends it at once when " +
-                    "connected, otherwise on the next connection.",
+                "Se muestra en el tablero al encender el contacto. Al guardar se envía " +
+                    "de inmediato si estás conectado, o en la próxima conexión.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             OutlinedTextField(
                 value = editing,
                 onValueChange = { if (it.length <= 17) editing = it },
-                label = { Text("Rider name") },
+                label = { Text("Nombre del piloto") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth(),
@@ -415,15 +409,15 @@ private fun RiderNameCard(name: String?, onNameChange: (String?) -> Unit) {
                     val trimmed = editing.trim().takeIf { it.isNotEmpty() }
                     onNameChange(trimmed)
                     editing = trimmed.orEmpty()
-                }) { Text("Save") }
+                }) { Text("Guardar") }
                 OutlinedButton(onClick = {
                     editing = ""
                     onNameChange(null)
-                }) { Text("Clear") }
+                }) { Text("Borrar") }
             }
             Text(
-                if (name.isNullOrBlank()) "Cluster shows HELLO RIDER"
-                else "Saved: $name — sent now if connected, else on next connection",
+                if (name.isNullOrBlank()) "El tablero muestra HELLO RIDER"
+                else "Guardado: $name — se envía ahora si estás conectado o al reconectar",
                 style = MaterialTheme.typography.bodySmall,
             )
         }
@@ -460,15 +454,14 @@ private fun DozeCard() {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp)) {
             Text(
-                if (exempt) "Battery optimisation: exempt"
-                else "Battery optimisation: not exempt",
+                if (exempt) "Optimización de batería: exenta"
+                else "Optimización de batería: activa (puede cortar BLE)",
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "Without this the phone sleeps mid-ride and the cluster drops the " +
-                    "connection. It does not give the app network access — it only " +
-                    "stops Android suspending it.",
+                "Sin esta excepción el teléfono suspende la app al apagar la pantalla " +
+                    "y el tablero pierde la conexión.",
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(12.dp))
@@ -493,7 +486,7 @@ private fun DozeCard() {
                         delay(1500)
                         exempt = isDozeExempt(ctx)
                     }
-                }) { Text("Open battery settings") }
+                }) { Text("Abrir ajustes de batería") }
             }
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -503,7 +496,7 @@ private fun DozeCard() {
                 )
                 Spacer(Modifier.size(12.dp))
                 Text(
-                    "Reconnect automatically after a reboot",
+                    "Reconectar automáticamente tras reiniciar",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -516,17 +509,17 @@ private fun RidesCard(rides: List<Ride>, totalRides: Int, totalDistanceKm: Doubl
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                "$totalRides rides · ${String.format(Locale.US, "%.1f", totalDistanceKm)} km total",
+                "$totalRides viajes · ${String.format(Locale.US, "%.1f", totalDistanceKm)} km en total",
                 style = MaterialTheme.typography.titleSmall,
             )
             Text(
-                "Recorded on this phone from the cluster's odometer. No account, no cloud.",
+                "Registrados en este teléfono desde el odómetro del tablero. Sin cuenta ni nube.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (rides.isEmpty()) {
                 Text(
-                    "No rides yet. Connect to the scooter and ride.",
+                    "Sin viajes todavía. Conéctate a tu moto y comienza a rodar.",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             } else {
@@ -536,7 +529,7 @@ private fun RidesCard(rides: List<Ride>, totalRides: Int, totalDistanceKm: Doubl
                     val whenText = df.format(Date(ride.startedAt))
                     val dist = String.format(Locale.US, "%.1f km", ride.distanceKm)
                     val dur = if (ride.inProgress) {
-                        "In progress · ${ride.durationMinutes()} min"
+                        "En curso · ${ride.durationMinutes()} min"
                     } else {
                         "${ride.durationMinutes()} min"
                     }

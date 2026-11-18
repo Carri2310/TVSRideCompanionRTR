@@ -103,13 +103,13 @@ class ScooterScanner(private val context: Context) {
             _state.value = _state.value.copy(
                 scanning = false,
                 error = when (errorCode) {
-                    SCAN_FAILED_ALREADY_STARTED -> "A scan is already running"
+                    SCAN_FAILED_ALREADY_STARTED -> "Ya hay un escaneo en curso"
                     SCAN_FAILED_APPLICATION_REGISTRATION_FAILED ->
-                        "The app could not be registered for scanning"
+                        "No se pudo registrar la app para escanear"
                     SCAN_FAILED_FEATURE_UNSUPPORTED ->
-                        "This device does not support BLE scanning"
-                    SCAN_FAILED_INTERNAL_ERROR -> "Bluetooth stack error — try again"
-                    else -> "Scan failed (code $errorCode)"
+                        "Este dispositivo no soporta escaneo BLE"
+                    SCAN_FAILED_INTERNAL_ERROR -> "Error del sistema Bluetooth — intenta de nuevo"
+                    else -> "Error al escanear (código $errorCode)"
                 },
             )
         }
@@ -179,7 +179,7 @@ class ScooterScanner(private val context: Context) {
 
         if (scanner == null) {
             _state.value = _state.value.copy(
-                error = "Bluetooth is off. Turn it on and scan again.",
+                error = "Bluetooth está apagado. Enciéndelo y vuelve a escanear.",
             )
             return
         }
@@ -216,8 +216,8 @@ class ScooterScanner(private val context: Context) {
         if (!ok) {
             _state.value = _state.value.copy(
                 scanning = false,
-                error = "Could not start scanning. Grant Bluetooth permission in " +
-                    "More → Permissions and try again.",
+                error = "No se pudo iniciar el escaneo. Concede el permiso de Bluetooth en " +
+                    "Más → Permisos e intenta de nuevo.",
             )
             return
         }

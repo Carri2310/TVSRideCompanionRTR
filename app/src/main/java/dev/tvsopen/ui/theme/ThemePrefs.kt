@@ -7,8 +7,8 @@ import androidx.compose.runtime.setValue
 
 /** How the app picks its palette. */
 enum class ThemeMode(val label: String) {
-    LIGHT("Light"),
-    DARK("Dark"),
+    LIGHT("Claro"),
+    DARK("Oscuro"),
     AUTO("Auto"),
 }
 

@@ -98,14 +98,14 @@ fun HomeScreen(
         }
 
         Spacer(Modifier.height(20.dp))
-        SectionLabel("Your scooter")
+        SectionLabel("Tu moto")
 
         // Card navigation rather than a value grid, mirroring the official app's
         // dashboard. The values live on the Overview tab where they belong.
         val ctx = LocalContext.current
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            NavCard(Modifier.weight(1f), Icons.Filled.Speed, "Overview", onOpenOverview)
-            NavCard(Modifier.weight(1f), Icons.Filled.Place, "Last parked") {
+            NavCard(Modifier.weight(1f), Icons.Filled.Speed, "Resumen", onOpenOverview)
+            NavCard(Modifier.weight(1f), Icons.Filled.Place, "Último parqueo") {
                 if (!openParkedLocation(ctx, parked)) onOpenParked()
             }
         }
@@ -119,7 +119,7 @@ fun HomeScreen(
         RideModeCard(rideMode, onRideModeChange)
 
         Spacer(Modifier.height(20.dp))
-        SectionLabel("While riding")
+        SectionLabel("En ruta")
 
         MirrorNavCard(navMirroring, hud, onNavMirrorChange)
         Spacer(Modifier.height(12.dp))
@@ -132,7 +132,7 @@ fun HomeScreen(
         // Telemetry freshness is the number that actually tells you whether the
         // link is alive. The frame counter belongs in the Log tab, not here.
         Spacer(Modifier.height(20.dp))
-        SectionLabel("Link")
+        SectionLabel("Enlace")
         LinkCard(telemetry)
 
         Spacer(Modifier.height(28.dp))
@@ -207,12 +207,12 @@ private fun ConnectCard(connected: Boolean, stateLabel: String, onClick: () -> U
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    if (connected) "Connected" else "Connect",
+                    if (connected) "Conectado" else "Conectar",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    if (connected) "Using Bluetooth" else stateLabel,
+                    if (connected) "Usando Bluetooth" else stateLabel,
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -253,7 +253,7 @@ private fun Header(connection: ConnectionState1, connected: Boolean) {
             )
         }
         Pill(
-            if (connected) "Connected" else connection.state.label,
+            if (connected) "Conectado" else connection.state.label,
             connected,
         )
         Spacer(Modifier.width(8.dp))
@@ -311,11 +311,11 @@ private fun MirrorNavCard(enabled: Boolean, hud: HudState, onChange: (Boolean) -
     ActionCard(
         background = LocalTilePalette.current.accent,
         icon = Icons.Filled.Navigation,
-        title = "Mirror navigation",
+        title = "Espejo de navegación",
         subtitle = when {
-            !enabled -> "Off — turn-by-turn is not being sent"
-            hud.active -> "Live from ${hud.provider ?: "your maps app"}"
-            else -> "On — waiting for a navigation step"
+            !enabled -> "Desactivado — no se envían indicaciones al tablero"
+            hud.active -> "En vivo desde ${hud.provider ?: "tu app de mapas"}"
+            else -> "Activado — esperando una ruta en tu app de mapas"
         },
         trailing = { AppSwitch(checked = enabled, onCheckedChange = onChange) },
     )
@@ -331,12 +331,12 @@ private fun LastParkedCard(parked: ParkedInfo?, onClick: () -> Unit = {}) {
     ActionCard(
         background = LocalTilePalette.current.neutral,
         icon = Icons.Filled.Place,
-        title = "Last Parked",
-        subtitle = parked?.label ?: "Not recorded on this device",
+        title = "Último parqueo",
+        subtitle = parked?.label ?: "Sin registrar en este dispositivo",
         onClick = if (clickable) onClick else null,
         trailing = {
             Text(
-                if (ago != null) "$ago ago" else "—",
+                if (ago != null) "hace $ago" else "—",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -345,7 +345,7 @@ private fun LastParkedCard(parked: ParkedInfo?, onClick: () -> Unit = {}) {
             if (parked?.distanceMeters != null) {
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    "${parked.distanceMeters}m away",
+                    "a ${parked.distanceMeters} m",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
@@ -361,7 +361,7 @@ private fun openParkedLocation(context: android.content.Context, parked: ParkedI
     if (parts.size != 2) return false
     val lat = parts[0]
     val lon = parts[1]
-    val uri = Uri.parse("geo:$lat,$lon?q=$lat,$lon(Parked scooter)")
+    val uri = Uri.parse("geo:$lat,$lon?q=$lat,$lon(Moto parqueada)")
     return runCatching {
         context.startActivity(Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         true
@@ -374,8 +374,8 @@ private fun FindMyCard(enabled: Boolean, onChange: (Boolean) -> Unit) {
     ActionCard(
         background = LocalTilePalette.current.accent,
         icon = Icons.Filled.NotificationsActive,
-        title = "Find My Scooter",
-        subtitle = "Flash lights & sound horn",
+        title = "Buscar mi moto",
+        subtitle = "Destellar luces y sonar pito",
         trailing = { AppSwitch(checked = enabled, onCheckedChange = onChange) },
     )
 }
@@ -459,10 +459,10 @@ private fun LinkCard(telemetry: Telemetry) {
         Column(Modifier.padding(18.dp)) {
             Text(
                 when {
-                    age == null -> "No telemetry received yet"
-                    age < 3_000 -> "Telemetry live"
-                    age < Telemetry.STALE_AFTER_MS -> "Telemetry ${age / 1000}s old"
-                    else -> "Telemetry stale — ${age / 1000}s since last frame"
+                    age == null -> "Aún no se recibe telemetría"
+                    age < 3_000 -> "Telemetría en vivo"
+                    age < Telemetry.STALE_AFTER_MS -> "Telemetría hace ${age / 1000} s"
+                    else -> "Telemetría sin actualizar — hace ${age / 1000} s"
                 },
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -505,7 +505,7 @@ private fun NavigationStrip(hud: HudState) {
             val distance = hud.distanceMeters
             Text(
                 if (distance >= 0) "$distance m · ${hud.etaMinutes} min"
-                else "${hud.etaMinutes} min to arrival",
+                else "${hud.etaMinutes} min para llegar",
                 style = NumberStyle,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
@@ -527,9 +527,9 @@ private fun RideModeCard(enabled: Boolean, onChange: (Boolean) -> Unit) {
     ActionCard(
         background = LocalTilePalette.current.neutral,
         icon = Icons.AutoMirrored.Filled.DirectionsBike,
-        title = "Ride Mode",
-        subtitle = if (enabled) "On \u2014 keeps the app active across a reboot"
-        else "Off (auto-enables on ride)",
+        title = "Modo viaje",
+        subtitle = if (enabled) "Activado \u2014 mantiene la app activa tras reiniciar"
+        else "Desactivado (se activa al rodar)",
         trailing = {
             // Deliberately NOT gated on `connected`. It used to be, which made
             // it unreachable in the only state a new install can reach — no

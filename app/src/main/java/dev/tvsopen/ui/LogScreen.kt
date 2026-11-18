@@ -80,8 +80,8 @@ fun LogScreen(modifier: Modifier = Modifier) {
         ) {
             Column(Modifier.padding(12.dp)) {
                 Text(
-                    "${frameCount} frames · ${visible.size} shown" +
-                        if (minLevel > Level.DEBUG) " · tap DEBUG for raw frames" else "",
+                    "$frameCount tramas · ${visible.size} visibles" +
+                        if (minLevel > Level.DEBUG) " · toca DEBUG para tramas crudas" else "",
                     style = MaterialTheme.typography.labelLarge,
                 )
                 Row(
@@ -98,22 +98,22 @@ fun LogScreen(modifier: Modifier = Modifier) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { autoScroll = !autoScroll }) {
-                        Text(if (autoScroll) "Follow: on" else "Follow: off")
+                        Text(if (autoScroll) "Seguir: sí" else "Seguir: no")
                     }
-                    TextButton(onClick = { Log.clear() }) { Text("Clear") }
+                    TextButton(onClick = { Log.clear() }) { Text("Limpiar") }
                     OutlinedButton(onClick = {
                         val out = Log.export(Log.exportDir(ctx))
                         if (out == null) {
-                            Toast.makeText(ctx, "No log file yet", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(ctx, "Aún no hay archivo de registro", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(
                                 ctx,
-                                "Saved to ${out.absolutePath}",
+                                "Guardado en ${out.absolutePath}",
                                 Toast.LENGTH_LONG,
                             ).show()
                             Log.i(TAG, "exported logs to ${out.absolutePath}")
                         }
-                    }) { Text("Export") }
+                    }) { Text("Exportar") }
                 }
             }
         }
@@ -127,7 +127,7 @@ fun LogScreen(modifier: Modifier = Modifier) {
             ) {
                 Icon(Icons.AutoMirrored.Filled.Article, contentDescription = null)
                 Text(
-                    "No records yet. Connect to a scooter, or check the filter level.",
+                    "Sin registros todavía. Conéctate a tu moto o cambia el nivel de filtro.",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

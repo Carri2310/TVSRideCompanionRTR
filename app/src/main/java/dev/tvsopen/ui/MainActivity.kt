@@ -250,26 +250,26 @@ class MainActivity : AppCompatActivity() {
                         NavigationBarItem(
                             selected = tab == 0,
                             onClick = { tab = 0 },
-                            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                            label = { Text("Home") },
+                            icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
+                            label = { Text("Inicio") },
                         )
                         NavigationBarItem(
                             selected = tab == 1,
                             onClick = { tab = 1 },
-                            icon = { Icon(Icons.Filled.MoreHoriz, contentDescription = "More") },
-                            label = { Text("More") },
+                            icon = { Icon(Icons.Filled.MoreHoriz, contentDescription = "Más") },
+                            label = { Text("Más") },
                         )
                         NavigationBarItem(
                             selected = tab == 2,
                             onClick = { tab = 2 },
-                            icon = { Icon(Icons.Filled.Speed, contentDescription = "Overview") },
-                            label = { Text("Overview") },
+                            icon = { Icon(Icons.Filled.Speed, contentDescription = "Resumen") },
+                            label = { Text("Resumen") },
                         )
                         NavigationBarItem(
                             selected = tab == 3,
                             onClick = { tab = 3 },
-                            icon = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = "Log") },
-                            label = { Text("Log") },
+                            icon = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = "Registro") },
+                            label = { Text("Registro") },
                         )
                     }
                 },
@@ -395,14 +395,14 @@ class MainActivity : AppCompatActivity() {
     private fun send(action: String) {
         if (!hasBlePermission()) {
             Log.w("MainActivity", "refusing to start $action: Bluetooth not granted")
-            Toast.makeText(this, "Grant Bluetooth permission first", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Concede primero el permiso de Bluetooth", Toast.LENGTH_LONG).show()
             requestBlePermissions()
             return
         }
         runCatching { startForegroundService(Intent(this, RideService::class.java).setAction(action)) }
             .onFailure {
                 Log.w("MainActivity", "could not start ride service: ${it.message}")
-                Toast.makeText(this, "Ride service not running", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "El servicio de viaje no está activo", Toast.LENGTH_LONG).show()
             }
     }
 
@@ -438,7 +438,7 @@ class MainActivity : AppCompatActivity() {
         val prefs = RidePrefs.load(this)
         val address = prefs.lastAddress
         if (address.isNullOrBlank()) {
-            Toast.makeText(this, "No scooter chosen yet — tap Connect to scan", Toast.LENGTH_LONG)
+            Toast.makeText(this, "Aún no has elegido moto — toca Conectar para escanear", Toast.LENGTH_LONG)
                 .show()
             return
         }
@@ -457,7 +457,7 @@ class MainActivity : AppCompatActivity() {
                     .putExtra(RideService.EXTRA_MODEL, model.name),
             )
         }.onFailure {
-            Toast.makeText(this, "Could not start the ride service", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "No se pudo iniciar el servicio de conexión", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -580,7 +580,7 @@ class MainActivity : AppCompatActivity() {
         val i = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
         runCatching { startActivity(i) }
             .onFailure {
-                Toast.makeText(this, "Open notification access from system settings", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Abre el acceso a notificaciones desde Ajustes del sistema", Toast.LENGTH_LONG).show()
             }
     }
 

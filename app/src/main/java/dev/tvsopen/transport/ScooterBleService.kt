@@ -42,11 +42,11 @@ enum class ConnectionState { DISCONNECTED, SCANNING, CONNECTING, CONNECTED, RECO
  */
 val ConnectionState.label: String
     get() = when (this) {
-        ConnectionState.DISCONNECTED -> "Disconnected"
-        ConnectionState.SCANNING -> "Scanning"
-        ConnectionState.CONNECTING -> "Connecting"
-        ConnectionState.CONNECTED -> "Connected"
-        ConnectionState.RECONNECTING -> "Reconnecting"
+        ConnectionState.DISCONNECTED -> "Desconectado"
+        ConnectionState.SCANNING -> "Escaneando"
+        ConnectionState.CONNECTING -> "Conectando"
+        ConnectionState.CONNECTED -> "Conectado"
+        ConnectionState.RECONNECTING -> "Reconectando"
     }
 
 data class BleFrame(val direction: Direction, val bytes: ByteArray, val atMillis: Long) {

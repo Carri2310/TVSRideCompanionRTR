@@ -48,7 +48,7 @@ enum class VehicleModel(
     U388("u388", "U388"),
     U399("u399", "U399"),
     IQUBE("iqube", "iQube"),
-    UNKNOWN("unknown", "Unknown SmartXonnect vehicle");
+    UNKNOWN("unknown", "Vehículo SmartXonnect desconocido");
 
     enum class Display { STANDARD, LARGE_TFT }
 

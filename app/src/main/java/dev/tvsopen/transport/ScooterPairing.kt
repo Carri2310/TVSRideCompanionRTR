@@ -151,8 +151,8 @@ class ScooterPairing(private val context: Context) {
                 Log.w(TAG, "createBond refused for $address")
                 _state.value = BondState.Failed(
                     address,
-                    "Android refused to start pairing — Bluetooth off, or too " +
-                        "many paired devices already",
+                    "Android rechazó iniciar el emparejamiento — Bluetooth apagado o " +
+                        "demasiados dispositivos vinculados",
                 )
             }
             started
@@ -187,12 +187,11 @@ class ScooterPairing(private val context: Context) {
      * button that would fail identically.
      */
     val pairModeInstructions = listOf(
-        "Turn the ignition on",
-        "Hold the MODE button on the switchgear for about 5 seconds",
-        "The cluster screen should show “BT Pair” — that is the signal to scan",
-        "The scooter appears as “TVS BT…” — pick it, pair, then connect",
-        "Still nothing? Disconnect the battery and reconnect it, which also " +
-            "forces pair mode",
+        "Pon el contacto de la moto en ON",
+        "Mantén presionado el botón MODE del tablero/comando unos 5 segundos",
+        "El tablero mostrará “BT Pair” — esa es la señal para escanear",
+        "Tu moto aparecerá como “TVS…” — selecciónala, empareja y conecta",
+        "¿No aparece? Desconectar y reconectar la batería también activa el modo emparejamiento",
     )
 
     /**
@@ -207,10 +206,10 @@ class ScooterPairing(private val context: Context) {
      */
     private fun describeReason(reason: Int): String = when (reason) {
         REASON_DISCONNECTED ->
-            "Disconnected while pairing — the scooter may have left pair mode"
-        REASON_AUTH_FAILED -> "Authentication failed; forget the device and pair again"
-        REASON_AUTH_REJECTED -> "The scooter rejected the pairing request"
-        else -> "Pairing failed (reason $reason)"
+            "Se desconectó al emparejar — es posible que la moto saliera del modo emparejamiento"
+        REASON_AUTH_FAILED -> "Error de autenticación; olvida el dispositivo y vuelve a emparejar"
+        REASON_AUTH_REJECTED -> "La moto rechazó la solicitud de emparejamiento"
+        else -> "Error al emparejar (motivo $reason)"
     }
 
     companion object {

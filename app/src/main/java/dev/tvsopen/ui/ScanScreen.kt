@@ -113,13 +113,13 @@ fun ScanScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
             }
             Column(Modifier.weight(1f)) {
-                Text("Find your scooter", style = MaterialTheme.typography.titleLarge)
+                Text("Buscar tu moto", style = MaterialTheme.typography.titleLarge)
                 Text(
-                    if (state.scanning) "Scanning — turn the ignition on"
-                    else "Scan stopped",
+                    if (state.scanning) "Escaneando — pon el contacto en ON"
+                    else "Escaneo detenido",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -142,13 +142,13 @@ fun ScanScreen(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "Only SmartXonnect clusters",
+                        "Solo tableros SmartXonnect",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Text(
                         // Kept short on purpose: a three-line wrap runs the
                         // text up against the switch and reads as clipped.
-                        "Turn off if it never appears — flipping rescans",
+                        "Desactívalo si no aparece — al cambiar vuelve a escanear",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -182,8 +182,8 @@ fun ScanScreen(
 
         when {
             state.devices.isEmpty() && state.scanning -> CentredNote(
-                "Looking for clusters…\n\nTurn the ignition on and make sure " +
-                    "Bluetooth is visible to other devices.",
+                "Buscando tableros…\n\nPon el contacto en ON y asegúrate de que " +
+                    "Bluetooth esté encendido.",
             )
 
             // The scan is time-boxed, so this is the normal resting state after
@@ -191,11 +191,10 @@ fun ScanScreen(
             // to scan again is to back out and re-enter, which reads as a bug.
             state.devices.isEmpty() -> CentredNote(
                 text = if (state.error != null) {
-                    "The scan could not run."
+                    "No se pudo ejecutar el escaneo."
                 } else {
-                    "Nothing found.\n\nScan again with the ignition on. If it " +
-                        "still shows nothing, switch off \"Only SmartXonnect " +
-                        "clusters\"."
+                    "No se encontró ningún dispositivo.\n\nVuelve a escanear con el contacto en ON. " +
+                        "Si sigue sin aparecer, desactiva \"Solo tableros SmartXonnect\"."
                 },
                 action = {
                     Button(onClick = { scanner.start(onlySmartXonnect) }) {
@@ -205,7 +204,7 @@ fun ScanScreen(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Scan again")
+                        Text("Escanear de nuevo")
                     }
                 },
             )
@@ -266,7 +265,7 @@ private fun PairModeCard(steps: List<String>, bond: BondState) {
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(
-                "First time? Put the scooter in pair mode",
+                "¿Primera vez? Pon la moto en modo emparejamiento",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
@@ -282,10 +281,10 @@ private fun PairModeCard(steps: List<String>, bond: BondState) {
             Spacer(Modifier.height(6.dp))
             Text(
                 when (bond) {
-                    is BondState.Pairing -> "Pairing…"
-                    is BondState.Paired -> "Paired"
+                    is BondState.Pairing -> "Emparejando…"
+                    is BondState.Paired -> "Emparejado"
                     is BondState.Failed -> bond.reason
-                    BondState.Idle -> "You only do this once. After pairing, the app connects on its own."
+                    BondState.Idle -> "Solo se hace una vez. Luego la app se conecta sola."
                 },
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -362,7 +361,7 @@ private fun DeviceRow(
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        device.name ?: "Unnamed device",
+                        device.name ?: "Dispositivo sin nombre",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -380,8 +379,8 @@ private fun DeviceRow(
                             // Name-only. Saying "SmartXonnect" here would be a
                             // claim we cannot back: the service UUID was absent
                             // from the advertisement, so this is a guess.
-                            device.byName -> "likely cluster (name only)"
-                            else -> "not a cluster"
+                            device.byName -> "posible tablero (solo nombre)"
+                            else -> "no es tablero"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -399,13 +398,13 @@ private fun DeviceRow(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Pair with this scooter (first time only)")
+                        Text("Emparejar con esta moto (solo la primera vez)")
                     }
                     Spacer(Modifier.height(10.dp))
                 }
-                Text("Which model is this?", style = MaterialTheme.typography.labelLarge)
+                Text("¿Qué modelo es?", style = MaterialTheme.typography.labelLarge)
                 Text(
-                    "Wrong model means the wrong frame table.",
+                    "Un modelo incorrecto usa una tabla de tramas distinta.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -430,7 +429,7 @@ private fun DeviceRow(
                 }
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = onConnect, modifier = Modifier.fillMaxWidth()) {
-                    Text("Connect as ${model.displayName}")
+                    Text("Conectar como ${model.displayName}")
                 }
             }
         }

@@ -79,9 +79,9 @@ fun OverviewScreen(
             .padding(horizontal = 16.dp),
     ) {
         Spacer(Modifier.height(18.dp))
-        Text("Vehicle Overview", style = MaterialTheme.typography.headlineLarge)
+        Text("Resumen de la moto", style = MaterialTheme.typography.headlineLarge)
         Text(
-            "Live from the instrument cluster",
+            "En vivo desde el tablero",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -96,7 +96,7 @@ fun OverviewScreen(
                 Icons.Filled.Speed,
                 telemetry.topSpeedKmh?.toString() ?: "—",
                 "km/h",
-                "Top Speed",
+                "Vel. máx.",
                 LocalTilePalette.current.largeLeft,
             )
             BigStat(
@@ -108,7 +108,7 @@ fun OverviewScreen(
                 // bytes 17-18. Only the speed tile is a top-speed field, and
                 // that is because the cluster sends one, not because we
                 // compute it.
-                "Engine RPM",
+                "RPM motor",
                 LocalTilePalette.current.largeRight,
             )
         }
@@ -118,49 +118,49 @@ fun OverviewScreen(
             Modifier.fillMaxWidth(),
             Icons.Filled.Timer,
             telemetry.timeTo60Sec?.let { String.format("%.1f", it) } ?: "—",
-            "sec",
-            "Best 0–60",
+            "seg",
+            "Mejor 0–60",
             LocalTilePalette.current.neutral,
         )
 
         Spacer(Modifier.height(20.dp))
-        SectionLabel("Fuel")
+        SectionLabel("Combustible")
         FuelGauge(telemetry.fuelBars)
 
         Spacer(Modifier.height(20.dp))
-        SectionLabel("Distance Travelled")
+        SectionLabel("Distancia recorrida")
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.Route,
                 telemetry.odometerKm?.let { String.format("%.1f", it) } ?: "—",
-                "Total distance",
+                "Distancia total",
             )
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.Route,
                 telemetry.connectedDistanceKm()
                     ?.let { String.format("%.1f", it) } ?: "—",
-                "This connection",
+                "Esta conexión",
             )
         }
 
         Spacer(Modifier.height(20.dp))
-        SectionLabel("Cluster telemetry")
+        SectionLabel("Telemetría del tablero")
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.BatteryChargingFull,
                 telemetry.batteryVoltage?.let { String.format("%.1f", it / 10.0) } ?: "—",
-                "Battery (V)",
+                "Batería (V)",
             )
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.Thermostat,
                 telemetry.engineTempC?.toString() ?: "—",
-                "Coolant (°C)",
+                "Motor (°C)",
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -169,17 +169,17 @@ fun OverviewScreen(
                 Modifier.weight(1f),
                 Icons.Filled.LocalGasStation,
                 telemetry.distanceToEmptyKm?.toString() ?: "—",
-                "Range (km)",
+                "Autonomía (km)",
             )
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.Build,
                 when (telemetry.serviceDue) {
-                    true -> "Due"
+                    true -> "Pendiente"
                     false -> "OK"
                     null -> "—"
                 },
-                "Service",
+                "Servicio",
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -188,8 +188,8 @@ fun OverviewScreen(
                 Modifier.weight(1f),
                 Icons.Filled.Warning,
                 when (telemetry.milOn) {
-                    true -> telemetry.milBlinkCode?.takeIf { it > 0 }?.let { "On ($it)" } ?: "On"
-                    false -> "Off"
+                    true -> telemetry.milBlinkCode?.takeIf { it > 0 }?.let { "Encendido ($it)" } ?: "Encendido"
+                    false -> "Apagado"
                     null -> "—"
                 },
                 "Check engine",
@@ -197,8 +197,8 @@ fun OverviewScreen(
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.Speed,
-                telemetry.avgEconomyKmpl?.let { "$it kmpl" } ?: "—",
-                "Avg economy",
+                telemetry.avgEconomyKmpl?.let { "$it km/l" } ?: "—",
+                "Consumo prom.",
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -206,8 +206,8 @@ fun OverviewScreen(
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.Speed,
-                telemetry.instantEconomyKmpl?.let { "$it kmpl" } ?: "—",
-                "Instant economy",
+                telemetry.instantEconomyKmpl?.let { "$it km/l" } ?: "—",
+                "Consumo inst.",
             )
             DistanceStat(
                 Modifier.weight(1f),
@@ -227,13 +227,13 @@ fun OverviewScreen(
                 Modifier.weight(1f),
                 Icons.Filled.Speed,
                 gearText,
-                "Gear",
+                "Marcha",
             )
             DistanceStat(
                 Modifier.weight(1f),
                 Icons.Filled.Speed,
                 telemetry.leanAngleDeg?.let { "$it°" } ?: "—",
-                "Lean angle",
+                "Inclinación",
             )
         }
 
@@ -403,8 +403,8 @@ private fun FuelGauge(bars: Int?) {
                 // a frame whose value is outside the six-bar gauge and so cannot
                 // be a bar count. Collapsing the third into the second would
                 // report a level the cluster never sent.
-                if (bars != null) "$filled of ${Telemetry.FUEL_BAR_MAX} bars"
-                else "No usable reading",
+                if (bars != null) "$filled de ${Telemetry.FUEL_BAR_MAX} barras"
+                else "Sin lectura válida",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
