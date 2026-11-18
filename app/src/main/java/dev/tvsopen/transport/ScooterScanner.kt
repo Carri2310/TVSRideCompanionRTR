@@ -121,11 +121,16 @@ class ScooterScanner(private val context: Context) {
         val services: List<ParcelUuid> = runCatching {
             result.scanRecord?.serviceUuids ?: emptyList()
         }.getOrDefault(emptyList())
-        val isSx = services.any { it.uuid?.toString()?.equals(Gatt.SERVICE, true) == true }
+        val isStandardSx = services.any { it.uuid?.toString()?.equals(Gatt.SERVICE, true) == true }
+        val isApacheIot = services.any {
+            it.uuid?.toString()?.equals(Gatt.APACHE_IOT_SERVICE, true) == true
+        }
+        val isSx = isStandardSx || isApacheIot
 
         val name = result.scanRecord?.deviceName
             ?: result.device?.name
         val byName = name != null && CLUSTER_NAME_RE.containsMatchIn(name)
+        val guessed = if (isApacheIot) VehicleModel.APACHE_160 else VehicleModel.detect(name)
         val d = Discovered(
             address = addr,
             name = name,
@@ -141,7 +146,7 @@ class ScooterScanner(private val context: Context) {
             byServiceUuid = isSx,
             byName = byName,
             lastSeenMillis = SystemClock.elapsedRealtime(),
-            guessedModel = VehicleModel.detect(name),
+            guessedModel = guessed,
         )
         val prev = found[addr]
         // Keep the strongest reading: RSSI jitters and the last packet is often
@@ -188,13 +193,14 @@ class ScooterScanner(private val context: Context) {
         )
 
         val filters = if (onlySmartXonnect) {
-            // ParcelUuid wraps a UUID, not a string; Gatt.SERVICE is the string
-            // form, so parse it rather than passing it straight through.
-            listOf(
+            // ParcelUuid wraps a UUID, not a string; Gatt.ALL_KNOWN_SERVICES
+            // holds both the standard petrol UUID and the Continental/LGIT
+            // Apache IOT service UUID.
+            Gatt.ALL_KNOWN_SERVICES.map { uuid ->
                 ScanFilter.Builder()
-                    .setServiceUuid(ParcelUuid(java.util.UUID.fromString(Gatt.SERVICE)))
-                    .build(),
-            )
+                    .setServiceUuid(ParcelUuid(java.util.UUID.fromString(uuid)))
+                    .build()
+            }
         } else {
             emptyList()
         }
@@ -265,16 +271,10 @@ class ScooterScanner(private val context: Context) {
         private const val STALE_AFTER_MS = 8_000L
 
         /**
-         * Advertised names of TVS clusters look like `TVS BT…`.
-         *
-         * **Inferred, not measured** — this comes from community accounts of
-         * pairing, not from a cluster seen in a scan record. It is therefore a
-         * second signal alongside the service UUID rather than a replacement for
-         * it, and the scan UI labels which one matched. If the real prefix
-         * differs this simply never fires; it cannot hide a device, only ever
-         * add a possibly-false one.
+         * Advertised names of TVS clusters look like `TVS BT…` (Ntorq/Jupiter)
+         * or `TVS<digits>` (Continental/LGIT Apache RTR clusters).
          */
-        private val CLUSTER_NAME_RE = Regex("""\bTVS\s*BT""", RegexOption.IGNORE_CASE)
+        private val CLUSTER_NAME_RE = Regex("""\bTVS(?:\s*BT|\d+)""", RegexOption.IGNORE_CASE)
 
         // Values from android.bluetooth.le.ScanCallback, inlined so the
         // mapping stays next to the message it produces.

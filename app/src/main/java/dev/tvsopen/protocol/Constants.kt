@@ -198,6 +198,24 @@ object Gatt {
     const val READ = "00005354-0000-1000-8000-00805f9b34fb"
     const val DEVICE_INFO = "00002902-0000-1000-8000-00805f9b34fb"
 
+    /**
+     * Continental / LG Innotek CSR101x serial-over-GATT service observed on
+     * Apache RTR 160 4V SmartXonnect clusters (advertised in the 128-bit
+     * service UUID list). Its write and notify characteristics are resolved
+     * dynamically inside this service at discovery time.
+     */
+    const val APACHE_IOT_SERVICE = "00005500-d102-11e1-9b23-000240198212"
+
+    /**
+     * Qualcomm / CSR uEnergy Over-The-Air Update (OTAU) DFU service exposed
+     * alongside [APACHE_IOT_SERVICE] on CSR101x clusters. Explicitly ignored
+     * by the BLE transport so the app never writes to firmware-update paths.
+     */
+    const val CSR_OTAU_SERVICE = "00001016-d102-11e1-9b23-00025b00a5a5"
+
+    /** All primary telemetry/control service UUIDs accepted by the scanner. */
+    val ALL_KNOWN_SERVICES: List<String> = listOf(SERVICE, APACHE_IOT_SERVICE)
+
     /** Tail of the U388 EV service UUID; the prefix is assembled at runtime. */
     const val U388_SERVICE_UUID_KEY = "9-5342-454E544F5251"
 

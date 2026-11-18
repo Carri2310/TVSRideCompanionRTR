@@ -5,6 +5,7 @@
 
 package dev.tvsopen
 
+import dev.tvsopen.protocol.ApacheDriver
 import dev.tvsopen.protocol.DriverRegistry
 import dev.tvsopen.protocol.JupiterDriver
 import dev.tvsopen.protocol.NtorqDriver
@@ -25,6 +26,10 @@ object Nucleus {
         // variants; only the fuel-byte gate differs.
         DriverRegistry.register(JupiterDriver(VehicleModel.JUPITER_110))
         DriverRegistry.register(JupiterDriver(VehicleModel.JUPITER_125))
+        // Apache RTR 160/180 frame layouts transcribed from the official
+        // `com.tvs.bike.core.protocol.apache.*` classes.
+        DriverRegistry.register(ApacheDriver(VehicleModel.APACHE_160))
+        DriverRegistry.register(ApacheDriver(VehicleModel.APACHE_180))
     }
 
     fun describe() = VehicleModel.entries.map { model ->

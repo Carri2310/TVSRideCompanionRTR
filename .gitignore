@@ -61,6 +61,7 @@ research/vendor/scoot-sim/.venv/
 # the reference material they illustrate.
 docs/reference/images/Screenshot_*
 docs/FORUM_POSTS.md
+capturas para analizar/
 
 # Python cache (sim/bridge tools)
 __pycache__/

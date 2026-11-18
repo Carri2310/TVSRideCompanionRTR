@@ -216,6 +216,26 @@ fun OverviewScreen(
                 "Firmware",
             )
         }
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            val gearText = when (val g = telemetry.gearPosition) {
+                null -> "—"
+                0 -> "N"
+                else -> g.toString()
+            }
+            DistanceStat(
+                Modifier.weight(1f),
+                Icons.Filled.Speed,
+                gearText,
+                "Gear",
+            )
+            DistanceStat(
+                Modifier.weight(1f),
+                Icons.Filled.Speed,
+                telemetry.leanAngleDeg?.let { "$it°" } ?: "—",
+                "Lean angle",
+            )
+        }
 
         Spacer(Modifier.height(28.dp))
     }

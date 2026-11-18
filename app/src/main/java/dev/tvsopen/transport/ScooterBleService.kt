@@ -213,6 +213,13 @@ class ScooterBleService(private val context: Context) {
         // Explicit <Boolean>: the lambda's last expression is a conditional on
         // `cont.resume(...)` which returns Unit, so inference would pick the
         // wrong T and `ok` would be typed as the continuation result itself.
+        val writeType = if (
+            (ch.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0
+        ) {
+            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+        } else {
+            BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+        }
         val ok = suspendCancellableCoroutine<Boolean> { cont ->
             val result = try {
                 // The 3-argument overload exists only on API 33+. Calling it on
@@ -220,14 +227,12 @@ class ScooterBleService(private val context: Context) {
                 // down, so the legacy path sets the value and type on the
                 // characteristic first — that is the only form API 26-32 has.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    g.writeCharacteristic(
-                        ch, bytes, BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE,
-                    ) == BluetoothGatt.GATT_SUCCESS
+                    g.writeCharacteristic(ch, bytes, writeType) == BluetoothGatt.GATT_SUCCESS
                 } else {
                     @Suppress("DEPRECATION")
                     ch.value = bytes
                     @Suppress("DEPRECATION")
-                    ch.writeType = BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                    ch.writeType = writeType
                     @Suppress("DEPRECATION")
                     g.writeCharacteristic(ch)
                 }
@@ -303,28 +308,24 @@ class ScooterBleService(private val context: Context) {
 
         @SuppressLint("MissingPermission")
         override fun onServicesDiscovered(g: BluetoothGatt, status: Int) {
-            val svc = resolveVerifiedService(g)
-            if (svc == null) {
+            val resolved = resolveVerifiedService(g)
+            if (resolved == null) {
                 Log.w(TAG, "no verified SmartXonnect service on ${g.device.address}")
                 return
             }
-            val ch = svc.getCharacteristic(UUID.fromString(Gatt.WRITE))
-            if (ch == null) {
-                // Unreachable after resolveVerifiedService, but the compiler
-                // needs the check and an explicit refusal beats a crash.
-                Log.w(TAG, "write characteristic ${Gatt.WRITE} missing")
-                return
-            }
+            val ch = resolved.writeChar
             writeChar = ch
             Log.i(
                 TAG,
-                "service ready (${svc.uuid}), write char props=0x${ch.properties.toString(16)}",
+                "service ready (${resolved.service.uuid}), write=${ch.uuid} " +
+                    "props=0x${ch.properties.toString(16)}, " +
+                    "notify=${resolved.notifyChars.joinToString { it.uuid.toString() }}",
             )
             // Listen before the CCCD write: the cluster can emit the 0x9A/0xF2
             // challenge the instant the descriptor is written, and anything
             // subscribed after that loses it. setCharacteristicNotification
             // only arms the local callback; the descriptor write follows.
-            enableNotifications(g, svc)
+            enableNotifications(g, resolved.notifyChars)
         }
 
         override fun onCharacteristicChanged(
@@ -366,9 +367,20 @@ class ScooterBleService(private val context: Context) {
         }
     }
 
+    private data class ResolvedGatt(
+        val service: android.bluetooth.BluetoothGattService,
+        val writeChar: BluetoothGattCharacteristic,
+        val notifyChars: List<BluetoothGattCharacteristic>,
+    )
+
+    private class PendingCccd(
+        val descriptor: BluetoothGattDescriptor,
+        val value: ByteArray,
+    )
+
     /** Pending CCCD writes, drained one per [onDescriptorWrite]. Guarded because
      * the callback arrives on a binder thread, not the caller's. */
-    private val cccdQueue = ArrayDeque<BluetoothGattDescriptor>()
+    private val cccdQueue = ArrayDeque<PendingCccd>()
     private val cccdLock = Any()
 
     @SuppressLint("MissingPermission")
@@ -382,7 +394,7 @@ class ScooterBleService(private val context: Context) {
         // normalise both to Boolean here.
         val ok = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             try {
-                g.writeDescriptor(next, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) ==
+                g.writeDescriptor(next.descriptor, next.value) ==
                     BluetoothGatt.GATT_SUCCESS
             } catch (e: SecurityException) {
                 Log.e(TAG, "CCCD write refused: ${e.message}")
@@ -390,10 +402,10 @@ class ScooterBleService(private val context: Context) {
             }
         } else {
             @Suppress("DEPRECATION")
-            next.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            next.descriptor.value = next.value
             try {
                 @Suppress("DEPRECATION")
-                g.writeDescriptor(next)
+                g.writeDescriptor(next.descriptor)
             } catch (e: SecurityException) {
                 Log.e(TAG, "CCCD write refused: ${e.message}")
                 false
@@ -450,16 +462,23 @@ class ScooterBleService(private val context: Context) {
      * answered.
      */
     @SuppressLint("MissingPermission")
-    private fun resolveVerifiedService(g: BluetoothGatt): android.bluetooth.BluetoothGattService? {
+    private fun resolveVerifiedService(g: BluetoothGatt): ResolvedGatt? {
         val serviceUuid = UUID.fromString(Gatt.SERVICE)
         val writeUuid = UUID.fromString(Gatt.WRITE)
         val readUuid = UUID.fromString(Gatt.READ)
+        val infoUuid = UUID.fromString(Gatt.DEVICE_INFO)
+        val apacheIotUuid = UUID.fromString(Gatt.APACHE_IOT_SERVICE)
+        val csrOtauUuid = UUID.fromString(Gatt.CSR_OTAU_SERVICE)
 
+        // 1. Standard petrol SmartXonnect service (Ntorq / Jupiter / newer Apache).
         val exact = g.getService(serviceUuid)
         if (exact != null) {
-            val hasBoth = exact.getCharacteristic(writeUuid) != null &&
-                exact.getCharacteristic(readUuid) != null
-            if (hasBoth) return exact
+            val w = exact.getCharacteristic(writeUuid)
+            val r = exact.getCharacteristic(readUuid)
+            if (w != null && r != null) {
+                val notifyList = listOfNotNull(r, exact.getCharacteristic(infoUuid))
+                return ResolvedGatt(exact, w, notifyList)
+            }
             Log.e(
                 TAG,
                 "service $serviceUuid present but a characteristic is missing; " +
@@ -468,32 +487,91 @@ class ScooterBleService(private val context: Context) {
             return null
         }
 
-        val byCharacteristics = g.services?.firstOrNull {
-            it.getCharacteristic(writeUuid) != null && it.getCharacteristic(readUuid) != null
+        // 2. Continental / LGIT CSR101x serial-over-GATT service (Apache RTR 160 4V).
+        // Characteristics are resolved by property mask inside this verified service
+        // only, and CSR OTAU (`00001016-…`) is explicitly never touched.
+        val apacheSvc = g.getService(apacheIotUuid)
+        if (apacheSvc != null) {
+            val chars = apacheSvc.characteristics ?: emptyList()
+            for (c in chars) {
+                Log.i(TAG, "apache-iot char ${c.uuid} props=0x${c.properties.toString(16)}")
+            }
+            val w = chars.firstOrNull {
+                (it.properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0
+            } ?: chars.firstOrNull {
+                (it.properties and BluetoothGattCharacteristic.PROPERTY_WRITE) != 0
+            }
+            val notifyChars = chars.filter {
+                (it.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0 ||
+                    (it.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
+            }
+            if (w != null && notifyChars.isNotEmpty()) {
+                return ResolvedGatt(apacheSvc, w, notifyChars)
+            }
+            Log.e(
+                TAG,
+                "service $apacheIotUuid present but missing write/notify characteristics " +
+                    "(found ${chars.size} chars)",
+            )
+            return null
         }
-        if (byCharacteristics == null) {
-            Log.e(TAG, "no service exposes both $writeUuid and $readUuid")
-        } else {
+
+        // 3. Fallback by standard 5352/5354 characteristics on any non-OTAU service.
+        val byCharacteristics = g.services?.firstOrNull {
+            it.uuid != csrOtauUuid &&
+                it.getCharacteristic(writeUuid) != null &&
+                it.getCharacteristic(readUuid) != null
+        }
+        if (byCharacteristics != null) {
             Log.w(
                 TAG,
                 "service UUID $serviceUuid absent; resolved by characteristics on ${byCharacteristics.uuid}",
             )
+            val w = byCharacteristics.getCharacteristic(writeUuid)!!
+            val r = byCharacteristics.getCharacteristic(readUuid)!!
+            val notifyList = listOfNotNull(r, byCharacteristics.getCharacteristic(infoUuid))
+            return ResolvedGatt(byCharacteristics, w, notifyList)
         }
-        return byCharacteristics
+
+        // Nothing matched: dump discovered non-standard services so capture logs
+        // show what the cluster actually exposes.
+        Log.e(TAG, "no service exposes $serviceUuid, $apacheIotUuid, or ($writeUuid + $readUuid)")
+        for (svc in g.services ?: emptyList()) {
+            val u = svc.uuid.toString()
+            if (u.startsWith("00001800-") || u.startsWith("00001801-") || u.startsWith("0000180a-")) {
+                continue
+            }
+            val summary = (svc.characteristics ?: emptyList()).joinToString { c ->
+                "${c.uuid}(0x${c.properties.toString(16)})"
+            }
+            Log.i(TAG, "discovered service $u: [$summary]")
+        }
+        return null
     }
 
     @SuppressLint("MissingPermission")
-    private fun enableNotifications(g: BluetoothGatt, svc: android.bluetooth.BluetoothGattService) {
-        val pending = ArrayList<BluetoothGattDescriptor>()
-        for (uuid in listOf(Gatt.READ, Gatt.DEVICE_INFO)) {
-            val ch = svc.getCharacteristic(UUID.fromString(uuid)) ?: continue
+    private fun enableNotifications(
+        g: BluetoothGatt,
+        chars: List<BluetoothGattCharacteristic>,
+    ) {
+        val pending = ArrayList<PendingCccd>()
+        for (ch in chars) {
             g.setCharacteristicNotification(ch, true)
             val cccd = ch.getDescriptor(CCCD)
             // Parentheses are required: `and` is an infix *function*, not a bitwise
             // operator, so `props and FLAG != 0` does not parse as intended.
             val canNotify = (ch.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0
-            if (cccd != null && canNotify) pending += cccd
-            else Log.d(TAG, "no notifiable CCCD for $uuid")
+            val canIndicate = (ch.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0
+            if (cccd != null && (canNotify || canIndicate)) {
+                val value = if (canNotify) {
+                    BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                } else {
+                    BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+                }
+                pending += PendingCccd(cccd, value)
+            } else {
+                Log.d(TAG, "no notifiable CCCD for ${ch.uuid}")
+            }
         }
         if (pending.isEmpty()) return
         synchronized(cccdLock) {

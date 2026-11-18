@@ -45,8 +45,12 @@ data class Telemetry(
     val avgEconomyKmpl: Int? = null,      // SM3 idx 8
     val instantEconomyKmpl: Int? = null,  // SM3 idx 9
     val distanceToEmptyKm: Int? = null,   // SM3 idx 11..12
-    val engineTempC: Int? = null,         // SM4 idx 8
-    val batteryVoltage: Int? = null,      // SM4 idx 11
+    val engineTempC: Int? = null,         // SM4/SM5 idx 8
+    val batteryVoltage: Int? = null,      // SM4/SM5 idx 11
+    /** Current gear reported by Apache SM2 (`0x11` idx 5); 0 = neutral. */
+    val gearPosition: Int? = null,
+    /** Lean angle reported by Apache SM3 (`0x12` idx 2). */
+    val leanAngleDeg: Int? = null,
     val lastFrameAt: Long = 0L,
     /**
      * Odometer reading when this link was established.
@@ -303,12 +307,21 @@ object Session {
             0x11 -> cur.copy(
                 serviceDue = (frame.field(Field.SERVICE_REMINDER)?.toInt()?.let { it != 0 })
                     ?: cur.serviceDue,
-                milOn = (frame.field(Field.VEHICLE_DIAGNOSTICS)?.toInt()
+                gearPosition = frame.field(Field.GEAR_POSITION)?.toInt() ?: cur.gearPosition,
+                milOn = ((frame.field(Field.VEHICLE_DIAGNOSTICS)
+                    ?: frame.field(Field.VEHICLE_DIAGNOSTICS_1))?.toInt()
                     ?.let { (it and 0x04) != 0 }) ?: cur.milOn,
                 milBlinkCode = frame.field(Field.MIL_BLINK_CODE)?.toInt()
                     ?: cur.milBlinkCode,
                 softwareVersion = frame.field(Field.SOFTWARE_VERSION)?.toInt()
                     ?.let { "0x%X".format(it) } ?: cur.softwareVersion,
+                lastFrameAt = now,
+            )
+
+            0x12 -> cur.copy(
+                distanceToEmptyKm = frame.field(Field.CRUISING_RANGE)?.toInt()
+                    ?: cur.distanceToEmptyKm,
+                leanAngleDeg = frame.field(Field.LEAN_ANGLE)?.toInt() ?: cur.leanAngleDeg,
                 lastFrameAt = now,
             )
 
